@@ -1,0 +1,93 @@
+-- Zad 3
+
+CREATE TABLE REGIONS (
+region_id number(9) PRIMARY KEY,
+region_name varchar2(30)
+);
+
+CREATE TABLE COUNTRIES(
+country_id NUMBER(9) PRIMARY KEY,
+country_name VARCHAR2(30),
+region_id NUMBER(9),
+CONSTRAINT fk_country_region_id
+FOREIGN KEY (region_id) REFERENCES REGIONS(region_id)
+);
+
+CREATE TABLE LOCATIONS (
+location_id NUMBER(9) PRIMARY KEY,
+street_address VARCHAR2(100),
+postal_code VARCHAR2(100),
+city VARCHAR2(100),
+state_province VARCHAR2(100),
+country_id NUMBER(9),
+CONSTRAINT fk_location_country_id
+FOREIGN KEY (country_id) REFERENCES COUNTRIES(country_id)
+);
+
+CREATE TABLE DEPARTMENTS (
+department_id NUMBER(9) PRIMARY KEY, 
+department_name VARCHAR2(100),
+manager_id NUMBER(9),
+location_id NUMBER(9),
+CONSTRAINT fk_department_location_id
+FOREIGN KEY (location_id) REFERENCES LOCATIONS(location_id)
+);
+
+CREATE TABLE JOB_HISTORY(
+employee_id NUMBER(9),
+start_date DATE,
+end_date DATE,
+job_id NUMBER(9),
+department_id NUMBER(9),
+CONSTRAINT pk_job_history
+PRIMARY KEY (employee_id, start_date),
+CONSTRAINT fk_job_department_id
+FOREIGN KEY(department_id) REFERENCES DEPARTMENTS(department_id)
+);
+
+CREATE TABLE JOBS(
+job_id NUMBER(9) PRIMARY KEY,
+job_title VARCHAR2(100),
+min_salary NUMBER(10,2),
+max_salary NUMBER(10,2),
+CHECK (max_salary - min_salary >= 2000)
+);
+
+CREATE TABLE EMPLOYEES(
+employee_id NUMBER(9) PRIMARY KEY,
+first_name VARCHAR2(100),
+last_name VARCHAR2(100),
+email VARCHAR2(100),
+phone_number VARCHAR2(11),
+hire_date DATE,
+job_id NUMBER(9),
+salary NUMBER(10,2),
+commission_pct VARCHAR2(100),
+manager_id NUMBER(9),
+department_id NUMBER(9),
+CONSTRAINT fk_employee_job_id
+FOREIGN KEY(job_id) REFERENCES JOBS(job_id),
+CONSTRAINT fk_employee_department_id
+FOREIGN KEY(department_id) REFERENCES DEPARTMENTS(department_id)
+);
+
+ALTER TABLE DEPARTMENTS
+ADD CONSTRAINT fk_department_manager_id
+FOREIGN KEY (manager_id) REFERENCES EMPLOYEES(employee_id);
+
+ALTER TABLE JOB_HISTORY
+ADD CONSTRAINT fk_job_jobs_id
+FOREIGN KEY (job_id) REFERENCES JOBS(job_id);
+
+ALTER TABLE JOB_HISTORY
+ADD CONSTRAINT fk_job_employee_id
+FOREIGN KEY (employee_id) REFERENCES EMPLOYEES(employee_id);
+
+ALTER TABLE EMPLOYEES
+ADD CONSTRAINT fk_employee_manager
+FOREIGN KEY (manager_id) REFERENCES EMPLOYEES(employee_id);
+
+-- Zad 4
+DROP TABLE REGIONS CASCADE CONSTRAINTS;
+
+FLASHBACK TABLE REGIONS TO BEFORE DROP;
