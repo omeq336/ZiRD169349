@@ -1,3 +1,4 @@
-# ZiRD169349
+PROJEKT ZALICZENIOWY
 
-Repozytorium na zadania z ćwiczeń
+- Jakub Pawlak
+- Marek Piotrowski
