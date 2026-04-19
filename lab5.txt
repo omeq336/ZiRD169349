@@ -1,0 +1,184 @@
+-- zad 1
+DECLARE
+    numer_max departments.department_id%TYPE;
+    nowy_departament departments.department_name%TYPE := 'EDUCATION';
+BEGIN
+    SELECT MAX(department_id)
+    INTO numer_max
+    FROM departments;
+
+    DBMS_OUTPUT.PUT_LINE(numer_max);
+
+    INSERT INTO departments (department_id, department_name)
+    VALUES (numer_max + 10, nowy_departament);
+END;
+/
+
+
+-- zad 2
+DECLARE
+    numer_max departments.department_id%TYPE;
+    nowy_departament departments.department_name%TYPE := 'EDUCATION';
+BEGIN
+    SELECT MAX(department_id)
+    INTO numer_max
+    FROM departments;
+
+    DBMS_OUTPUT.PUT_LINE(numer_max);
+
+    INSERT INTO departments (department_id, department_name)
+    VALUES (numer_max + 10, nowy_departament);
+
+    UPDATE departments
+    SET location_id = 3000
+    WHERE department_id = numer_max + 10;
+END;
+/
+
+-- zad 3
+CREATE TABLE nowa (
+    wartosc VARCHAR2(10)
+);
+
+BEGIN
+    FOR i IN 1..10 LOOP
+        IF i NOT IN (4, 6) THEN
+            INSERT INTO nowa (wartosc)
+            VALUES (i);
+        END IF;
+    END LOOP;
+END;
+/
+
+-- zad 4
+DECLARE
+    kraj countries%ROWTYPE;
+BEGIN
+    SELECT *
+    INTO kraj
+    FROM countries
+    WHERE country_id = 'CA';
+
+    DBMS_OUTPUT.PUT_LINE(kraj.country_name || ' ' || kraj.region_id);
+END;
+/
+
+-- zad 5
+DECLARE
+    CURSOR c IS
+        SELECT last_name, salary
+        FROM employees
+        WHERE department_id = 50;
+BEGIN
+    FOR rec IN c LOOP
+        IF rec.salary > 3100 THEN
+            DBMS_OUTPUT.PUT_LINE(rec.last_name || ' nie dawać podwyżki');
+        ELSE
+            DBMS_OUTPUT.PUT_LINE(rec.last_name || ' dać podwyżkę');
+        END IF;
+    END LOOP;
+END;
+/
+
+-- zad 6
+DECLARE
+    CURSOR c(p_min NUMBER, p_max NUMBER, p_name VARCHAR2) IS
+        SELECT first_name, last_name, salary
+        FROM employees
+        WHERE salary BETWEEN p_min AND p_max
+          AND UPPER(first_name) LIKE '%' || UPPER(p_name) || '%';
+BEGIN
+    -- a
+    FOR rec IN c(1000, 5000, 'a') LOOP
+        DBMS_OUTPUT.PUT_LINE(rec.first_name || ' ' || rec.last_name);
+    END LOOP;
+
+    -- b
+    FOR rec IN c(5000, 20000, 'u') LOOP
+        DBMS_OUTPUT.PUT_LINE(rec.first_name || ' ' || rec.last_name);
+    END LOOP;
+END;
+/
+
+-- zad 9
+-- a
+CREATE OR REPLACE PROCEDURE add_job(
+    p_job_id IN jobs.job_id%TYPE,
+    p_job_title IN jobs.job_title%TYPE
+) IS
+BEGIN
+    INSERT INTO jobs (job_id, job_title)
+    VALUES (p_job_id, p_job_title);
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Błąd: ' || SQLERRM);
+END;
+/
+
+-- b
+CREATE OR REPLACE PROCEDURE update_job(
+    p_job_id IN jobs.job_id%TYPE,
+    p_job_title IN jobs.job_title%TYPE
+) IS
+BEGIN
+    UPDATE jobs
+    SET job_title = p_job_title
+    WHERE job_id = p_job_id;
+
+    IF SQL%ROWCOUNT = 0 THEN
+        RAISE NO_DATA_FOUND;
+    END IF;
+
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('Brak aktualizacji');
+END;
+/
+
+-- c
+CREATE OR REPLACE PROCEDURE delete_job(
+    p_job_id IN jobs.job_id%TYPE
+) IS
+BEGIN
+    DELETE FROM jobs
+    WHERE job_id = p_job_id;
+
+    IF SQL%ROWCOUNT = 0 THEN
+        RAISE NO_DATA_FOUND;
+    END IF;
+
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('Brak usuniętych rekordów');
+END;
+/
+
+-- d
+CREATE OR REPLACE PROCEDURE get_employee_data(
+    p_id IN employees.employee_id%TYPE,
+    p_salary OUT employees.salary%TYPE,
+    p_last_name OUT employees.last_name%TYPE
+) IS
+BEGIN
+    SELECT salary, last_name
+    INTO p_salary, p_last_name
+    FROM employees
+    WHERE employee_id = p_id;
+END;
+/
+
+-- e
+CREATE OR REPLACE PROCEDURE add_employee(
+    p_first_name IN employees.first_name%TYPE,
+    p_last_name IN employees.last_name%TYPE,
+    p_salary IN employees.salary%TYPE
+) IS
+BEGIN
+    IF p_salary > 20000 THEN
+        RAISE_APPLICATION_ERROR(-20001, 'Za wysokie wynagrodzenie');
+    END IF;
+
+    INSERT INTO employees (employee_id, first_name, last_name, salary)
+    VALUES (1, p_first_name, p_last_name, p_salary);
+END;
+/
